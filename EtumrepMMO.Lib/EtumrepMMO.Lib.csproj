@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="deps\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PKHeX.Core" Version="22.3.1" />
+  </ItemGroup>
+
+  <Choose>
+    <When Condition=" '$(Platform)' == 'x64' OR $(RuntimeIdentifier.EndsWith('x64')) ">
+      <!-- x64 specific references -->
+      <ItemGroup>
+        <PackageReference Include="Microsoft.Z3" Version="4.8.14" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <!-- x86 specific references -->
+      <ItemGroup>
+        <PackageReference Include="Microsoft.Z3.x86" Version="4.8.15" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
