@@ -29,7 +29,7 @@ public static class GroupSeedFinder
 
             var pokeResult = IterativeReversal.GetSeeds(entity, maxRolls);
 
-            foreach (var (pokeSeed, _) in pokeResult)
+            foreach (var (pokeSeed, rolls) in pokeResult)
             {
                 // Get seed for slot-pkm
                 var genSeeds = GenSeedReversal.FindPotentialGenSeeds(pokeSeed);
@@ -41,6 +41,8 @@ public static class GroupSeedFinder
                     {
                         if (!IsValidGroupSeed(groupSeed, ecs))
                             continue;
+
+                        Console.WriteLine($"Found a group seed with PID roll count = {rolls}");
                         count++;
                         yield return groupSeed;
                     }
