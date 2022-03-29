@@ -28,4 +28,18 @@ public class ReversalTests
         var results = groupSeed.ToArray();
         results.Length.Should().Be(1);
     }
+
+    [Theory]
+    [InlineData(0xce662cc305201801, 0x5108de3827bd825c)]
+    public void ReverseStep1(ulong seedGroup, ulong seedGen)
+    {
+        var xoro = new Xoroshiro128Plus(seedGroup);
+        var expectGen = xoro.Next();
+        expectGen.Should().Be(seedGen);
+
+        var s0 = unchecked(seedGen - Xoroshiro128Plus.XOROSHIRO_CONST);
+        s0.Should().Be(seedGroup);
+
+        GroupSeedReversal.GetGroupSeed(seedGen).Should().Be(seedGroup);
+    }
 }

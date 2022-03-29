@@ -35,17 +35,14 @@ public static class GroupSeedFinder
                 var genSeeds = GenSeedReversal.FindPotentialGenSeeds(pokeSeed);
                 foreach (var genSeed in genSeeds)
                 {
-                    // Get the group seed
-                    var groupSeeds = GenSeedReversal.FindPotentialGroupSeeds(genSeed);
-                    foreach (var groupSeed in groupSeeds)
-                    {
-                        if (!IsValidGroupSeed(groupSeed, ecs))
-                            continue;
+                    // Get the group seed - O(1) calc
+                    var groupSeed = GroupSeedReversal.GetGroupSeed(genSeed);
+                    if (!IsValidGroupSeed(groupSeed, ecs))
+                        continue;
 
-                        Console.WriteLine($"Found a group seed with PID roll count = {rolls}");
-                        count++;
-                        yield return groupSeed;
-                    }
+                    Console.WriteLine($"Found a group seed with PID roll count = {rolls}");
+                    count++;
+                    yield return groupSeed;
                 }
             }
             Console.WriteLine($"Found {count} group seeds for entity {i+1}.");
