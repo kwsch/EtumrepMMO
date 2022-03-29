@@ -24,9 +24,8 @@ public class ReversalTests
             seeds.Should().NotBeEmpty();
         }
 
-        var groupSeed = GroupSeedFinder.FindSeeds(all, rollCount);
-        var results = groupSeed.ToArray();
-        results.Length.Should().Be(1);
+        var groupSeed = GroupSeedFinder.FindSeed(all, rollCount);
+        groupSeed.Should().NotBe(default);
     }
 
     [Theory]
@@ -41,5 +40,18 @@ public class ReversalTests
         s0.Should().Be(seedGroup);
 
         GroupSeedReversal.GetGroupSeed(seedGen).Should().Be(seedGroup);
+    }
+
+    [Theory]
+    [InlineData(0xad819080a1effcf6, 0xfcca2321c7d655ed)]
+    public void ReverseStep2(ulong seedGen, ulong seedPoke)
+    {
+        var xoro = new Xoroshiro128Plus(seedGen);
+        _ = xoro.Next(); // slot
+        var expectPoke = xoro.Next();
+        expectPoke.Should().Be(seedPoke);
+
+        var reversal = GenSeedReversal.FindPotentialGenSeeds(seedPoke);
+        reversal.Single().Should().Be(seedGen);
     }
 }
