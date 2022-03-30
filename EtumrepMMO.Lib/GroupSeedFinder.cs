@@ -6,16 +6,16 @@ public static class GroupSeedFinder
 {
     public const byte max_rolls = 32;
 
-    public static IEnumerable<ulong> FindSeeds(string folder, byte maxRolls = max_rolls) => FindSeeds(Directory.EnumerateFiles(folder), maxRolls);
-    public static IEnumerable<ulong> FindSeeds(IEnumerable<string> files, byte maxRolls = max_rolls) => FindSeeds(files.Select(File.ReadAllBytes), maxRolls);
-    public static IEnumerable<ulong> FindSeeds(IEnumerable<byte[]> data, byte maxRolls = max_rolls) => FindSeeds(data.Select(PKMConverter.GetPKMfromBytes).OfType<PKM>(), maxRolls);
+    public static ulong FindSeed(string folder, byte maxRolls = max_rolls) => FindSeed(Directory.EnumerateFiles(folder), maxRolls);
+    public static ulong FindSeed(IEnumerable<string> files, byte maxRolls = max_rolls) => FindSeed(files.Select(File.ReadAllBytes), maxRolls);
+    public static ulong FindSeed(IEnumerable<byte[]> data, byte maxRolls = max_rolls) => FindSeed(data.Select(PKMConverter.GetPKMfromBytes).OfType<PKM>(), maxRolls);
 
     /// <summary>
     /// Returns all valid Group Seeds (should only be one) that generated the input data.
     /// </summary>
     /// <param name="data">Entities that were generated</param>
     /// <param name="maxRolls">Max amount of PID re-rolls for shiny odds.</param>
-    public static IEnumerable<ulong> FindSeeds(IEnumerable<PKM> data, byte maxRolls = max_rolls)
+    public static ulong FindSeed(IEnumerable<PKM> data, byte maxRolls = max_rolls)
     {
         var entities = data.ToArray();
         var ecs = entities.Select(z => z.EncryptionConstant).ToArray();
@@ -25,8 +25,6 @@ public static class GroupSeedFinder
         {
             var entity = entities[i];
             Console.WriteLine($"Checking entity {i+1}/{entities.Length} for group seeds...");
-            int count = 0;
-
             var pokeResult = IterativeReversal.GetSeeds(entity, maxRolls);
 
             foreach (var (pokeSeed, rolls) in pokeResult)
@@ -41,12 +39,11 @@ public static class GroupSeedFinder
                         continue;
 
                     Console.WriteLine($"Found a group seed with PID roll count = {rolls}");
-                    count++;
-                    yield return groupSeed;
+                    return groupSeed;
                 }
             }
-            Console.WriteLine($"Found {count} group seeds for entity {i+1}.");
         }
+        return default;
     }
 
     /// <summary>

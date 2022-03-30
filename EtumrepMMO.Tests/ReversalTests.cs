@@ -24,9 +24,8 @@ public class ReversalTests
             seeds.Should().NotBeEmpty();
         }
 
-        var groupSeed = GroupSeedFinder.FindSeeds(all, rollCount);
-        var results = groupSeed.ToArray();
-        results.Length.Should().Be(1);
+        var groupSeed = GroupSeedFinder.FindSeed(all, rollCount);
+        groupSeed.Should().NotBe(default);
     }
 
     [Theory]
@@ -41,5 +40,32 @@ public class ReversalTests
         s0.Should().Be(seedGroup);
 
         GroupSeedReversal.GetGroupSeed(seedGen).Should().Be(seedGroup);
+    }
+
+    [Theory]
+    [InlineData(5, new ulong[] { })]
+    [InlineData(0xfcca2321c7d655ed, new[] { 0xad819080a1effcf6u })]
+    [InlineData(0x366a1a7ed65e146c, new[] { 0x041b4ef9172f53f3u, 0xd9d1e54df50036ecu })]
+    [InlineData(0xa69d3c25666a8c6a, new[] { 0x323ff4f71fb9898cu, 0x3d8d7e995f7569feu, 0x0eec4cffd2595d1bu })]
+    public void ReverseStep2(ulong seedPoke, ulong[] seedGenPossible)
+    {
+        foreach (var seedGen in seedGenPossible)
+        {
+            var xoro = new Xoroshiro128Plus(seedGen);
+            _ = xoro.Next(); // slot
+            var expectPoke = xoro.Next();
+            expectPoke.Should().Be(seedPoke);
+        }
+
+        var reversal = GenSeedReversal.FindPotentialGenSeeds(seedPoke).ToArray();
+        if (seedGenPossible.Length == 0)
+        {
+            reversal.Length.Should().Be(0);
+            return;
+        }
+
+        // check for sequence equality, any order
+        seedGenPossible.Should().Contain(reversal);
+        reversal.Should().Contain(seedGenPossible);
     }
 }
