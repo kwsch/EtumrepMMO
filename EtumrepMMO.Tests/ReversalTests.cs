@@ -43,6 +43,7 @@ public class ReversalTests
     }
 
     [Theory]
+    [InlineData(5, new ulong[] { })]
     [InlineData(0xfcca2321c7d655ed, new[] { 0xad819080a1effcf6u })]
     [InlineData(0x366a1a7ed65e146c, new[] { 0x041b4ef9172f53f3u, 0xd9d1e54df50036ecu })]
     [InlineData(0xa69d3c25666a8c6a, new[] { 0x323ff4f71fb9898cu, 0x3d8d7e995f7569feu, 0x0eec4cffd2595d1bu })]
@@ -57,6 +58,11 @@ public class ReversalTests
         }
 
         var reversal = GenSeedReversal.FindPotentialGenSeeds(seedPoke).ToArray();
+        if (seedGenPossible.Length == 0)
+        {
+            reversal.Length.Should().Be(0);
+            return;
+        }
 
         // check for sequence equality, any order
         seedGenPossible.Should().Contain(reversal);
