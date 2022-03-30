@@ -17,16 +17,27 @@ public static class GenSeedReversal
     public static IEnumerable<ulong> FindPotentialGenSeeds(ulong seed)
     {
         var exp = CreateGenSeedModel(seed);
-        if (Check(exp) is not { } m)
-            throw new ArgumentException("Unable to solve expression.");
 
-        foreach (var kvp in m.Consts)
+        // Z3 is a theorem prover, and only proves if the model can be solved.
+        // To yield multiple possible values from the expression, we must re-evaluate with added constraints.
+        // Add each previously valid result as an "and this must not be a result".
+        // Yield until no results found.
+        while (Check(exp) is { } m)
         {
-            var tmp = (BitVecNum)kvp.Value;
-            yield return tmp.UInt64;
+            foreach (var kvp in m.Consts) // should only be 1
+            {
+                var tmp = (BitVecNum)kvp.Value;
+                var possible = tmp.UInt64;
+                yield return possible;
+
+                // Force the model to ignore the above result for s0, so we may get a new result if any.
+                var constraint = ctx.MkNot(ctx.MkEq(GenSeedResult, tmp));
+                exp = ctx.MkAnd(exp, constraint);
+            }
         }
     }
 
+    private static readonly BitVecExpr GenSeedResult = ctx.MkBVConst("s0", 64);
     private static readonly BitVecExpr GenSeedExpression = GetBaseGenSeedModel();
 
     private static BoolExpr CreateGenSeedModel(ulong seed)
@@ -37,7 +48,7 @@ public static class GenSeedReversal
 
     private static BitVecExpr GetBaseGenSeedModel()
     {
-        BitVecExpr s0 = ctx.MkBVConst("s0", 64);
+        BitVecExpr s0 = GenSeedResult;
         BitVecExpr s1 = ctx.MkBV(Xoroshiro128Plus.XOROSHIRO_CONST, 64);
 
         // var slotRand = ctx.MkBVAdd(s0, s1);
