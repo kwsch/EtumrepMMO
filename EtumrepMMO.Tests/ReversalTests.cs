@@ -28,6 +28,16 @@ public class ReversalTests
         groupSeed.Should().NotBe(default);
     }
 
+    [Fact]
+    public void TestRuntime()
+    {
+        var pk = Properties.Resources.Tentacool1;
+        const int rollCount = 17;
+
+        var seeds = RuntimeReversal.GetSeeds(new PA8(pk), rollCount);
+        seeds.Should().NotBeEmpty();
+    }
+
     [Theory]
     [InlineData(0xce662cc305201801, 0x5108de3827bd825c)]
     public void ReverseStep1(ulong seedGroup, ulong seedGen)
