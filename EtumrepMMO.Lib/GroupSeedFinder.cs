@@ -29,7 +29,7 @@ public static class GroupSeedFinder
         {
             var entity = entities[i];
             Console.WriteLine($"Checking entity {i+1}/{entities.Length} for group seeds...");
-            var pokeResult = IterativeReversal.GetSeeds(entity, maxRolls);
+            var pokeResult = RuntimeReversal.GetSeeds(entity, maxRolls);
 
             foreach (var (pokeSeed, rolls) in pokeResult)
             {
