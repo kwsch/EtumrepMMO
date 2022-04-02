@@ -6,16 +6,20 @@ public static class GroupSeedFinder
 {
     public const byte max_rolls = 32;
 
-    public static ulong FindSeed(string folder, byte maxRolls = max_rolls) => FindSeed(Directory.EnumerateFiles(folder), maxRolls);
-    public static ulong FindSeed(IEnumerable<string> files, byte maxRolls = max_rolls) => FindSeed(files.Select(File.ReadAllBytes), maxRolls);
-    public static ulong FindSeed(IEnumerable<byte[]> data, byte maxRolls = max_rolls) => FindSeed(data.Select(PKMConverter.GetPKMfromBytes).OfType<PKM>(), maxRolls);
+    public static ulong FindSeed(string folder, byte maxRolls = max_rolls) => FindSeed(GetInputs(folder), maxRolls);
+    public static ulong FindSeed(IEnumerable<string> files, byte maxRolls = max_rolls) => FindSeed(GetInputs(files), maxRolls);
+    public static ulong FindSeed(IEnumerable<byte[]> data, byte maxRolls = max_rolls) => FindSeed(GetInputs(data), maxRolls);
+
+    public static IReadOnlyList<PKM> GetInputs(string folder) => GetInputs(Directory.EnumerateFiles(folder));
+    public static IReadOnlyList<PKM> GetInputs(IEnumerable<string> files) => GetInputs(files.Select(File.ReadAllBytes));
+    public static IReadOnlyList<PKM> GetInputs(IEnumerable<byte[]> data) => data.Select(PKMConverter.GetPKMfromBytes).OfType<PKM>().Where(z => !z.IsShiny).ToArray();
 
     /// <summary>
     /// Returns all valid Group Seeds (should only be one) that generated the input data.
     /// </summary>
     /// <param name="data">Entities that were generated</param>
     /// <param name="maxRolls">Max amount of PID re-rolls for shiny odds.</param>
-    public static ulong FindSeed(IEnumerable<PKM> data, byte maxRolls = max_rolls)
+    public static ulong FindSeed(IReadOnlyList<PKM> data, byte maxRolls = max_rolls)
     {
         var entities = data.ToArray();
         var ecs = entities.Select(z => z.EncryptionConstant).ToArray();
