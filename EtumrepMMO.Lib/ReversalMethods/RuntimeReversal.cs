@@ -23,15 +23,13 @@ public static class RuntimeReversal
         }
     }
 
-    public static List<SeedSearchResult> GetAllSeeds(PKM pk, byte max_rolls)
+    private static List<SeedSearchResult> GetAllSeeds(PKM pk, byte max_rolls)
     {
         var result = new List<SeedSearchResult>();
         var seeds = pk.IsShiny ? FindPotentialSeedsShiny(pk, max_rolls) : FindPotentialSeeds(pk, max_rolls);
 
         foreach (var seed in seeds)
         {
-            bool added = false;
-
             for (var cnt = 1; cnt <= max_rolls; cnt++)
             {
                 for (int ivs = 0; ivs <= 4; ivs++)
@@ -40,52 +38,21 @@ public static class RuntimeReversal
                     if (ivs is > 0 and < 3)
                         ivs = 3;
 
-                    if (pk.FlawlessIVCount >= ivs && IsMatch(seed, ivs, cnt, pk, out uint shiny_xor))
-                    {
-                        result.Add(new SeedSearchResult(SearchResult.Success, seed, shiny_xor, ivs, cnt));
-                        added = true;
-                    }
+                    if (pk.FlawlessIVCount >= ivs && IsMatch(seed, ivs, cnt, pk))
+                        result.Add(new SeedSearchResult(seed, cnt));
                 }
             }
-            if (!added)
-                result.Add(new SeedSearchResult(SearchResult.SeedMismatch, seed, 0, 0, 0));
         }
-
-        if (result.Count == 0)
-            result.Add(SeedSearchResult.None);
-        else if (result.Any(z => z.Type == SearchResult.Success))
-            result.RemoveAll(z => z.Type != SearchResult.Success);
         return result;
     }
 
-    public class SeedSearchResult
+    private readonly record struct SeedSearchResult(ulong Seed, int ShinyRolls)
     {
-        public static readonly SeedSearchResult None = new(SearchResult.SeedMismatch, default, 0, 0, 0);
-
-        public readonly SearchResult Type;
-        public readonly ulong Seed;
-        public readonly string ShinyXor;
-        public readonly int FlawlessIVCount;
-        public readonly int ShinyRolls;
-
-        public SeedSearchResult(SearchResult type, ulong seed, uint shiny_xor, int ivCount, int rolls)
-        {
-            Type = type;
-            Seed = seed;
-            ShinyXor = shiny_xor < 16 ? shiny_xor.ToString() : "Not a shiny seed.";
-            FlawlessIVCount = ivCount;
-            ShinyRolls = rolls;
-        }
+        public readonly ulong Seed = Seed;
+        public readonly int ShinyRolls = ShinyRolls;
     }
 
-    public enum SearchResult
-    {
-        Success,
-        SeedMismatch,
-        SeedNone,
-    }
-
-    public static ConcurrentBag<ulong> FindPotentialSeeds(PKM pk, byte max_rolls)
+    private static ConcurrentBag<ulong> FindPotentialSeeds(PKM pk, byte max_rolls)
     {
         ulong start_seed = pk.EncryptionConstant - unchecked((uint)Xoroshiro128Plus.XOROSHIRO_CONST);
         Console.WriteLine($"Iteration start seed: {start_seed:X16}");
@@ -107,7 +74,7 @@ public static class RuntimeReversal
         return all_seeds;
     }
 
-    public static ConcurrentBag<ulong> FindPotentialSeedsShiny(PKM pk, byte max_rolls)
+    private static ConcurrentBag<ulong> FindPotentialSeedsShiny(PKM pk, byte max_rolls)
     {
         ulong start_seed = pk.EncryptionConstant - unchecked((uint)Xoroshiro128Plus.XOROSHIRO_CONST);
         Console.WriteLine($"Iteration start seed: {start_seed:X16}");
@@ -148,8 +115,7 @@ public static class RuntimeReversal
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ulong CheckSeedShiny(ulong seed, uint expectPID, byte max_rolls)
     {
-        ulong seed0 = seed;
-        var rng = new Xoroshiro128Plus(seed0);
+        var rng = new Xoroshiro128Plus(seed);
         rng.NextInt(); // EC
         rng.NextInt(); // fakeTID
 
@@ -157,13 +123,13 @@ public static class RuntimeReversal
         {
             var pid = rng.NextInt();
             if (expectPID == (pid & 0xFFFF))
-                return seed0;
+                return seed;
         }
         return 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsMatch(ulong seed, int fixed_ivs, int rolls, PKM pk, out uint shiny_xor)
+    private static bool IsMatch(ulong seed, int fixed_ivs, int rolls, PKM pk)
     {
         int[] IVs = pk.IVs;
         PKX.ReorderSpeedLast(IVs);
@@ -177,7 +143,7 @@ public static class RuntimeReversal
             pid = (uint)rng.NextInt(); // PID
 
         // Record whether this was a shiny seed or not.
-        shiny_xor = GetShinyXor(pid, fakeTID);
+        var shiny_xor = GetShinyXor(pid, fakeTID);
 
         if (!pk.IsShiny && pk.PID != pid && pk.PID != (pid ^ 0x10000000))
             return false;
@@ -186,13 +152,14 @@ public static class RuntimeReversal
         if (pk.IsShiny && shiny_xor > 0xF)
             return false;
 
-        int[] check_ivs = { -1, -1, -1, -1, -1, -1 };
+        Span<int> check_ivs = stackalloc int[6];
+        check_ivs.Fill(-1);
         for (int i = 0; i < fixed_ivs; i++)
         {
-            uint slot;
+            int slot;
             do
             {
-                slot = (uint)rng.NextInt(6);
+                slot = (int)rng.NextInt(6);
             } while (check_ivs[slot] != -1);
 
             if (IVs[slot] != 31)
@@ -205,7 +172,7 @@ public static class RuntimeReversal
             if (check_ivs[i] != -1)
                 continue; // already verified?
 
-            uint iv = (uint)rng.NextInt(32);
+            int iv = (int)rng.NextInt(32);
             if (iv != IVs[i])
                 return false;
         }
