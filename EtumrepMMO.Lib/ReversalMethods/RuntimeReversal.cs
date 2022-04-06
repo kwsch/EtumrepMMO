@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using PKHeX.Core;
@@ -26,7 +27,18 @@ public static class RuntimeReversal
     private static List<SeedSearchResult> GetAllSeeds(PKM pk, byte max_rolls)
     {
         var result = new List<SeedSearchResult>();
-        var seeds = pk.IsShiny ? FindPotentialSeedsShiny(pk, max_rolls) : FindPotentialSeeds(pk, max_rolls);
+        ConcurrentBag<ulong> seeds = new();
+
+        if (pk.IsShiny)
+        {
+            FindPotentialSeedsShiny(seeds, pk.PID & 0xFFFF, pk.EncryptionConstant, max_rolls);
+        }
+        else
+        {
+            FindPotentialSeeds(seeds, pk.PID, pk.EncryptionConstant, max_rolls);
+            if (IsPotentialAntiShiny(pk.TID, pk.SID, pk.PID))
+                FindPotentialSeeds(seeds, pk.PID ^ 0x1000_0000, pk.EncryptionConstant, max_rolls);
+        }
 
         foreach (var seed in seeds)
         {
@@ -46,19 +58,26 @@ public static class RuntimeReversal
         return result;
     }
 
+    public static bool IsPotentialAntiShiny(int tid, int sid, uint pid)
+    {
+        return GetIsShiny(tid, sid, pid ^ 0x1000_0000);
+    }
+
+    private static bool GetIsShiny(int tid, int sid, uint pid)
+    {
+        return GetShinyXor(pid, (uint)((sid << 16) | tid)) < 16;
+    }
+
     private readonly record struct SeedSearchResult(ulong Seed, int ShinyRolls)
     {
         public readonly ulong Seed = Seed;
         public readonly int ShinyRolls = ShinyRolls;
     }
 
-    private static ConcurrentBag<ulong> FindPotentialSeeds(PKM pk, byte max_rolls)
+    private static void FindPotentialSeeds(ConcurrentBag<ulong> all_seeds, uint pid, uint ec, byte max_rolls)
     {
-        ulong start_seed = pk.EncryptionConstant - unchecked((uint)Xoroshiro128Plus.XOROSHIRO_CONST);
-        Console.WriteLine($"Iteration start seed: {start_seed:X16}");
-        ConcurrentBag<ulong> all_seeds = new();
-
-        var pid = pk.PID;
+        ulong start_seed = ec - unchecked((uint)Xoroshiro128Plus.XOROSHIRO_CONST);
+        Debug.WriteLine($"Iteration start seed: {start_seed:X16}");
 
         Parallel.For(0, 0xFFFF, i =>
         {
@@ -71,16 +90,12 @@ public static class RuntimeReversal
                 test += 0x1_0000_0000;
             }
         });
-        return all_seeds;
     }
 
-    private static ConcurrentBag<ulong> FindPotentialSeedsShiny(PKM pk, byte max_rolls)
+    private static void FindPotentialSeedsShiny(ConcurrentBag<ulong> all_seeds, uint pid, uint ec, byte max_rolls)
     {
-        ulong start_seed = pk.EncryptionConstant - unchecked((uint)Xoroshiro128Plus.XOROSHIRO_CONST);
-        Console.WriteLine($"Iteration start seed: {start_seed:X16}");
-        ConcurrentBag<ulong> all_seeds = new();
-
-        var pid = pk.PID & 0xFFFF;
+        ulong start_seed = ec - unchecked((uint)Xoroshiro128Plus.XOROSHIRO_CONST);
+        Debug.WriteLine($"Iteration start seed: {start_seed:X16}");
 
         Parallel.For(0, 0xFFFF, i =>
         {
@@ -93,7 +108,6 @@ public static class RuntimeReversal
                 test += 0x1_0000_0000;
             }
         });
-        return all_seeds;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

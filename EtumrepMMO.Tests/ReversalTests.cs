@@ -78,4 +78,12 @@ public class ReversalTests
         seedGenPossible.Should().Contain(reversal);
         reversal.Should().Contain(seedGenPossible);
     }
+
+    [Theory]
+    [InlineData(15156, 10217, 0xD9ECD53B)]
+    public void IsPotentialShiny(int tid, int sid, uint pid)
+    {
+        var result = RuntimeReversal.IsPotentialAntiShiny(tid, sid, pid);
+        result.Should().BeTrue();
+    }
 }
