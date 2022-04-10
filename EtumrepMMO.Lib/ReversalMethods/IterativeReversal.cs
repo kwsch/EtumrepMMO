@@ -68,6 +68,7 @@ public static class IterativeReversal
         return FindSeeds(pk.PID, pk.EncryptionConstant, ivs, max_rolls, seeds, rolls);
     }
 
+    /// <inheritdoc cref="FindSeeds(uint,uint,ReadOnlySpan{byte},byte,Span{ulong},Span{byte})"/>
     public static (ulong Seed, byte Rolls)[] GetSeeds(uint pid, uint ec, ReadOnlySpan<byte> ivs, byte max_rolls)
     {
         const int overkill = 0x10; // normally 0-2 results, but let's go overboard :)
@@ -80,6 +81,7 @@ public static class IterativeReversal
         return GetResult(count, possible, rolls);
     }
 
+    /// <inheritdoc cref="GetSeeds(uint,uint,ReadOnlySpan{byte},byte)"/>
     public static (ulong Seed, byte Rolls)[] GetSeeds(PKM pk, byte max_rolls)
     {
         const int overkill = 0x10; // normally 0-2 results, but let's go overboard :)

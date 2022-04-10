@@ -6,22 +6,38 @@ using PKHeX.Core;
 
 namespace EtumrepMMO.Lib;
 
+/// <summary>
+/// Picks out the entity-seed reversal algorithm
+/// </summary>
 public static class RuntimeReversal
 {
+    /// <summary>
+    /// Enables using the C# Implementation if the faster native implementation fails to find a result.
+    /// </summary>
+    public static bool EnableFallbackReversal { get; set; } = true;
+
+    /// <summary>
+    /// Finds all entity-seeds for the entity.
+    /// </summary>
+    /// <param name="pk">Entity to check</param>
+    /// <param name="max_rolls">Maximum amount of shiny rolls permitted</param>
+    /// <returns>Count of seed-rolls stored in the input spans.</returns>
     public static (ulong Seed, byte Rolls)[] GetSeeds(PKM pk, byte max_rolls)
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            var result = GetAllSeeds(pk, max_rolls);
-            var map = new (ulong, byte)[result.Count];
-            for (int i = 0; i < result.Count; i++)
-                map[i] = (result[i].Seed, (byte)result[i].ShinyRolls);
-            return map;
+            // The dll makes some assumptions in order to maximize performance for 99.9999% of cases.
+            // If we fail to get a result (extremely unlikely), then fall back to the C# implementation.
+            var dllResults = IterativeReversal.GetSeeds(pk, max_rolls);
+            if (dllResults.Length != 0 || !EnableFallbackReversal)
+                return dllResults;
         }
-        else
-        {
-            return IterativeReversal.GetSeeds(pk, max_rolls);
-        }
+
+        var result = GetAllSeeds(pk, max_rolls);
+        var map = new (ulong, byte)[result.Count];
+        for (int i = 0; i < result.Count; i++)
+            map[i] = (result[i].Seed, (byte)result[i].ShinyRolls);
+        return map;
     }
 
     private static List<SeedSearchResult> GetAllSeeds(PKM pk, byte max_rolls)
