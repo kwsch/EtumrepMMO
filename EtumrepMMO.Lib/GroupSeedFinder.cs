@@ -6,23 +6,42 @@ public static class GroupSeedFinder
 {
     public const byte max_rolls = 32;
 
+    #region Seed Detection
+
+    /// <inheritdoc cref="FindSeed(IEnumerable{PKM},byte)"/>
     public static ulong FindSeed(string folder, byte maxRolls = max_rolls) => FindSeed(GetInputs(folder), maxRolls);
+
+    /// <inheritdoc cref="FindSeed(IEnumerable{PKM},byte)"/>
     public static ulong FindSeed(IEnumerable<string> files, byte maxRolls = max_rolls) => FindSeed(GetInputs(files), maxRolls);
+
+    /// <inheritdoc cref="FindSeed(IEnumerable{PKM},byte)"/>
     public static ulong FindSeed(IEnumerable<byte[]> data, byte maxRolls = max_rolls) => FindSeed(GetInputs(data), maxRolls);
 
+    #endregion
+
+    #region Data Fetching
+
+    /// <summary> Gets entities from the provided input source. </summary>
     public static IReadOnlyList<PKM> GetInputs(string folder) => GetInputs(Directory.EnumerateFiles(folder));
+
+    /// <inheritdoc cref="GetInputs(string)"/>
     public static IReadOnlyList<PKM> GetInputs(IEnumerable<string> files) => GetInputs(files.Select(File.ReadAllBytes));
-    public static IReadOnlyList<PKM> GetInputs(IEnumerable<byte[]> data) => data.Select(PKMConverter.GetPKMfromBytes).OfType<PKM>().Where(z => !z.IsShiny).ToArray();
+
+    /// <inheritdoc cref="GetInputs(string)"/>
+    public static IReadOnlyList<PKM> GetInputs(IEnumerable<byte[]> data) => data.Select(PKMConverter.GetPKMfromBytes).OfType<PKM>().ToArray();
+
+    #endregion
 
     /// <summary>
     /// Returns all valid Group Seeds (should only be one) that generated the input data.
     /// </summary>
     /// <param name="data">Entities that were generated</param>
     /// <param name="maxRolls">Max amount of PID re-rolls for shiny odds.</param>
-    public static ulong FindSeed(IReadOnlyList<PKM> data, byte maxRolls = max_rolls)
+    /// <returns>Default if no result found, otherwise a single seed (no duplicates are possible).</returns>
+    public static ulong FindSeed(IEnumerable<PKM> data, byte maxRolls = max_rolls)
     {
         var entities = data.ToArray();
-        var ecs = entities.Select(z => z.EncryptionConstant).ToArray();
+        var ecs = Array.ConvertAll(entities, z => z.EncryptionConstant);
 
         // Backwards we go! Reverse the pkm data -> seed first (this takes the longest, so we only do one at a time).
         for (int i = 0; i < entities.Length; i++)

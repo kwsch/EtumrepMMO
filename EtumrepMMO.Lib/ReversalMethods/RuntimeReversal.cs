@@ -17,7 +17,7 @@ public static class RuntimeReversal
     public static bool EnableFallbackReversal { get; set; }
 
     /// <summary>
-    /// Enables using the C# Implementation if the faster native implementation fails to find a result.
+    /// Enables using the native dll reversal library (if supported by the host operating system).
     /// </summary>
     public static bool UseNativeReversalLibrary { get; set; } = true;
 
@@ -80,6 +80,13 @@ public static class RuntimeReversal
         return result;
     }
 
+    /// <summary>
+    /// Indicates if the input <see cref="pid"/> is an anti-shiny with the supplied trainer data.
+    /// </summary>
+    /// <param name="tid">16-bit trainer ID</param>
+    /// <param name="sid">16-bit trainer ID (secret)</param>
+    /// <param name="pid">32-bit entity personality value</param>
+    /// <returns>True if was shiny, then made anti-shiny.</returns>
     public static bool IsPotentialAntiShiny(int tid, int sid, uint pid)
     {
         return GetIsShiny(tid, sid, pid ^ 0x1000_0000);
