@@ -29,6 +29,9 @@ public static class RuntimeReversal
     /// <returns>Count of seed-rolls stored in the input spans.</returns>
     public static (ulong Seed, byte Rolls)[] GetSeeds(PKM pk, byte max_rolls)
     {
+        if (pk.IsShiny)
+            return GetSeedsRuntime(pk, max_rolls);
+
         if (UseNativeReversalLibrary && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             // The dll makes some assumptions in order to maximize performance for 99.9999% of cases.
@@ -39,6 +42,11 @@ public static class RuntimeReversal
         }
 
         // C# Implementation
+        return GetSeedsRuntime(pk, max_rolls);
+    }
+
+    public static (ulong Seed, byte Rolls)[] GetSeedsRuntime(PKM pk, byte max_rolls)
+    {
         var result = GetAllSeeds(pk, max_rolls);
         var map = new (ulong, byte)[result.Count];
         for (int i = 0; i < result.Count; i++)
