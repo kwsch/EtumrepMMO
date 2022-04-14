@@ -24,7 +24,7 @@ public class ReversalTests
             seeds.Should().NotBeEmpty();
         }
 
-        var groupSeed = GroupSeedFinder.FindSeed(all, rollCount);
+        var groupSeed = GroupSeedFinder.FindSeed(all, rollCount, SpawnerType.MultiSpawn);
         groupSeed.Should().NotBe(default);
     }
 
@@ -36,6 +36,18 @@ public class ReversalTests
 
         var seeds = RuntimeReversal.GetSeeds(new PA8(pk), rollCount);
         seeds.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public void TestSingle()
+    {
+        var pk1 = new PA8(Properties.Resources.Snorlax1);
+        var pk2 = new PA8(Properties.Resources.Snorlax2);
+        const int rollCount = 5;
+
+        var pk = new[] { pk1, pk2 };
+        var seed = GroupSeedFinder.FindSeed(pk, rollCount, SpawnerType.SingleSpawn);
+        seed.FirstIndex.Should().NotBe(-1);
     }
 
     [Theory]

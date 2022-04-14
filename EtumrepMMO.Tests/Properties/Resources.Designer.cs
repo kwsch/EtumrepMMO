@@ -63,6 +63,26 @@ namespace EtumrepMMO.Tests.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Snorlax1 {
+            get {
+                object obj = ResourceManager.GetObject("Snorlax1", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Snorlax2 {
+            get {
+                object obj = ResourceManager.GetObject("Snorlax2", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Tentacool1 {
             get {
                 object obj = ResourceManager.GetObject("Tentacool1", resourceCulture);

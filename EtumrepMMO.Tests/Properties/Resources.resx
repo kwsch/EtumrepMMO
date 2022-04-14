@@ -118,6 +118,12 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="Snorlax1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\143_-_Snorlax-_-_Brave_-_25.28.31.14.31.31_-_Anubis_-_007575_-_Gigaton_-_A53EC417F0C7.pa8;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Snorlax2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\143_-_Snorlax-_-_Gentle_-_28.13.31.0.31.31_-_Anubis_-_007575_-_Gigaton_-_692F76E0757E.pa8;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Tentacool1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\072 - Tentacool - Gentle - 19.3.21.26.27.9 - Anubis - 007575 - Ultra - 5FBCEA73C048.pa8;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

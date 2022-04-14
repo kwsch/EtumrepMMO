@@ -12,15 +12,15 @@ else if (inputs.Count > 4)
 }
 else
 {
-    var result = GroupSeedFinder.FindSeed(inputs);
-    if (result is default(ulong))
+    var (seed, index) = GroupSeedFinder.FindSeed(inputs);
+    if (index == -1)
     {
         Console.WriteLine($"No group seeds found with the input data. Double check your inputs (valid inputs: {inputs.Count}).");
     }
     else
     {
-        Console.WriteLine("Found seed!");
-        Console.WriteLine(result);
+        Console.WriteLine($"Found seed from input {index + 1}/{inputs.Count}!");
+        Console.WriteLine(seed);
     }
 }
 
