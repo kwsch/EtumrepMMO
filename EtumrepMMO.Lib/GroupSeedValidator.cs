@@ -13,21 +13,22 @@ public static class GroupSeedValidator
     /// <param name="seed">Group seed</param>
     /// <param name="ecs">Entity encryption constants</param>
     /// <param name="firstIndexEC">Initial spawn EC index</param>
-    /// <param name="initialCount">Total entities spawned in the initial appearance.</param>
+    /// <param name="count">Count of entities spawned in the initial appearance.</param>
     /// <returns>True if all <see cref="ecs"/> are generated from the <see cref="seed"/>.</returns>
-    public static bool IsValidGroupSeed(in ulong seed, ReadOnlySpan<uint> ecs, in int firstIndexEC, int initialCount = 4)
+    /// <remarks>Pattern: Multi spawner spawns count >=2, and only count.</remarks>
+    public static bool IsMultiInitial(in ulong seed, ReadOnlySpan<uint> ecs, in int firstIndexEC, int count = 4)
     {
         if (ecs.Length == 0)
             throw new ArgumentOutOfRangeException(nameof(ecs));
         if ((uint)firstIndexEC >= ecs.Length)
             throw new ArgumentOutOfRangeException(nameof(firstIndexEC));
-        if ((uint)initialCount < ecs.Length)
+        if ((uint)count < ecs.Length)
             return false; // Can only handle initial spawns; we aren't permuting all sets of [2-initialCount] from the input ecs.
 
         int matched = 0;
 
         var rand = new Xoroshiro128Plus(seed);
-        for (int count = 0; count < initialCount; count++)
+        for (int i = 0; i < count; i++)
         {
             var genseed = rand.Next();
             _ = rand.Next(); // unknown
@@ -48,7 +49,8 @@ public static class GroupSeedValidator
     /// <param name="ecs">Entity encryption constants</param>
     /// <param name="firstIndexEC">Initial spawn EC index</param>
     /// <returns>True if all <see cref="ecs"/> are generated from the <see cref="seed"/>.</returns>
-    public static bool IsValidGroupSeedSingle(ulong seed, ReadOnlySpan<uint> ecs, in int firstIndexEC)
+    /// <remarks>Pattern: Single spawner spawns 1, then 1 for each successive wave.</remarks>
+    public static bool IsSingleSingle(ulong seed, ReadOnlySpan<uint> ecs, in int firstIndexEC)
     {
         if (ecs.Length == 0)
             throw new ArgumentOutOfRangeException(nameof(ecs));
@@ -73,6 +75,58 @@ public static class GroupSeedValidator
             list.RemoveAt(index);
 
             seed = rand.Next();
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Uses the input <see cref="seed"/> as the group seed to check if it generates all of the input <see cref="PKM.EncryptionConstant"/> values.
+    /// </summary>
+    /// <param name="seed">Group seed</param>
+    /// <param name="ecs">Entity encryption constants</param>
+    /// <param name="firstIndexEC">Initial spawn EC index</param>
+    /// <returns>True if all <see cref="ecs"/> are generated from the <see cref="seed"/>.</returns>
+    /// <remarks>Pattern: Multi spawner spawns 1, then >1 for the next wave.</remarks>
+    public static bool IsSingleMulti(ulong seed, ReadOnlySpan<uint> ecs, in int firstIndexEC)
+    {
+        if (ecs.Length == 0)
+            throw new ArgumentOutOfRangeException(nameof(ecs));
+        if ((uint)firstIndexEC >= ecs.Length)
+            throw new ArgumentOutOfRangeException(nameof(ecs));
+
+        var list = ecs.ToArray().ToList();
+
+        // Check first
+        var rand = new Xoroshiro128Plus(seed);
+        {
+            var genseed = rand.Next();
+            _ = rand.Next(); // unknown
+            var ec = GetEncryptionConstant(genseed);
+            if (ec != ecs[firstIndexEC])
+                return false;
+
+            var index = list.IndexOf(ec);
+            if (index == -1)
+                return false;
+
+            list.RemoveAt(index);
+        }
+        seed = rand.Next();
+
+        rand = new Xoroshiro128Plus(seed);
+        int count = list.Count;
+        for (int i = 0; i < count; i++)
+        {
+            var genseed = rand.Next();
+            _ = rand.Next(); // unknown
+
+            var ec = GetEncryptionConstant(genseed);
+            var index = ecs.IndexOf(ec);
+            if (index == -1)
+                return false;
+
+            list.RemoveAt(index);
         }
 
         return true;

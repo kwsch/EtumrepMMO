@@ -22,7 +22,12 @@ public enum SpawnerType
     SingleSpawn = 1 << 1,
 
     /// <summary>
+    /// The set of data contains single entities that spawned separately, one after another.
+    /// </summary>
+    MixedSpawn = 1 << 2,
+
+    /// <summary>
     /// Validate with all modes (unspecific). First match will return, collisions impossible with sufficient data.
     /// </summary>
-    All = MultiSpawn | SingleSpawn,
+    All = MultiSpawn | SingleSpawn | MixedSpawn,
 }

@@ -63,10 +63,12 @@ public static class GroupSeedFinder
                 {
                     // Get the group seed - O(1) calc
                     var groupSeed = GroupSeedReversal.GetGroupSeed(genSeed);
-                    if (mode.HasFlag(MultiSpawn) && GroupSeedValidator.IsValidGroupSeed(groupSeed, ecs, i))
+                    if (mode.HasFlag(MultiSpawn) && GroupSeedValidator.IsMultiInitial(groupSeed, ecs, i))
                         Console.WriteLine($"Found a group seed with PID roll count = {rolls}");
-                    else if (mode.HasFlag(SingleSpawn) && GroupSeedValidator.IsValidGroupSeedSingle(groupSeed, ecs, i))
+                    else if (mode.HasFlag(SingleSpawn) && GroupSeedValidator.IsSingleSingle(groupSeed, ecs, i))
                         Console.WriteLine($"Found a single-spawn group seed with PID roll count = {rolls}");
+                    else if (mode.HasFlag(MixedSpawn) && GroupSeedValidator.IsSingleMulti(groupSeed, ecs, i))
+                        Console.WriteLine($"Found a 1+{ecs.Length-1} spawn group seed with PID roll count = {rolls}");
                     else
                         continue;
 

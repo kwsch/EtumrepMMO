@@ -46,8 +46,9 @@ public class ReversalTests
         const int rollCount = 5;
 
         var pk = new[] { pk1, pk2 };
-        var seed = GroupSeedFinder.FindSeed(pk, rollCount, SpawnerType.SingleSpawn);
-        seed.FirstIndex.Should().NotBe(-1);
+        var (seed, firstIndex) = GroupSeedFinder.FindSeed(pk, rollCount, SpawnerType.SingleSpawn);
+        seed.Should().Be(0x38dd607647e5b2b5);
+        firstIndex.Should().Be(1);
     }
 
     [Theory]
