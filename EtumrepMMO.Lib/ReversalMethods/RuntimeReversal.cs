@@ -48,9 +48,16 @@ public static class RuntimeReversal
     public static (ulong Seed, byte Rolls)[] GetSeedsRuntime(PKM pk, byte max_rolls)
     {
         var result = GetAllSeeds(pk, max_rolls);
+        if (result.Count > 0)
+            Console.WriteLine("Found Seeds using runtime search method:");
+
         var map = new (ulong, byte)[result.Count];
         for (int i = 0; i < result.Count; i++)
-            map[i] = (result[i].Seed, (byte)result[i].ShinyRolls);
+        {
+            var (seed, shinyRolls) = result[i];
+            map[i] = (seed, (byte)shinyRolls);
+            Console.WriteLine($"{seed:x} (rolls = {shinyRolls})");
+        }
         return map;
     }
 
