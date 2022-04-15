@@ -30,7 +30,10 @@ public static class RuntimeReversal
     public static (ulong Seed, byte Rolls)[] GetSeeds(PKM pk, byte max_rolls)
     {
         if (pk.IsShiny)
+        {
+            Console.WriteLine("Shiny...");
             return GetSeedsRuntime(pk, max_rolls);
+        }
 
         if (UseNativeReversalLibrary && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -39,6 +42,8 @@ public static class RuntimeReversal
             var dllResults = IterativeReversal.GetSeeds(pk, max_rolls);
             if (dllResults.Length != 0 || !EnableFallbackReversal)
                 return dllResults;
+
+            Console.WriteLine("Falling back to runtime search...");
         }
 
         // C# Implementation
@@ -47,9 +52,12 @@ public static class RuntimeReversal
 
     public static (ulong Seed, byte Rolls)[] GetSeedsRuntime(PKM pk, byte max_rolls)
     {
+        Console.WriteLine("Searching with runtime search method...");
+        var sw = new Stopwatch();
+        sw.Start();
         var result = GetAllSeeds(pk, max_rolls);
-        if (result.Count > 0)
-            Console.WriteLine("Found Seeds using runtime search method:");
+        var msg = result.Count == 0 ? "No seeds found." : "Found seeds using runtime search method:";
+        Console.WriteLine(msg);
 
         var map = new (ulong, byte)[result.Count];
         for (int i = 0; i < result.Count; i++)
@@ -58,6 +66,9 @@ public static class RuntimeReversal
             map[i] = (seed, (byte)shinyRolls);
             Console.WriteLine($"{seed:x} (rolls = {shinyRolls})");
         }
+
+        Console.WriteLine($"Time: {sw.Elapsed.TotalSeconds:F2} seconds");
+        Console.WriteLine();
         return map;
     }
 
