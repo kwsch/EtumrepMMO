@@ -22,6 +22,8 @@ public static class GroupSeedValidator
             throw new ArgumentOutOfRangeException(nameof(ecs));
         if ((uint)firstIndexEC >= ecs.Length)
             throw new ArgumentOutOfRangeException(nameof(firstIndexEC));
+        if (count == 1 || ecs.Length == 1)
+            return false; // We're expecting a multi-spawn initial; the inputs obviously aren't.
         if ((uint)count < ecs.Length)
             return false; // Can only handle initial spawns; we aren't permuting all sets of [2-initialCount] from the input ecs.
 
@@ -56,6 +58,8 @@ public static class GroupSeedValidator
             throw new ArgumentOutOfRangeException(nameof(ecs));
         if ((uint)firstIndexEC >= ecs.Length)
             throw new ArgumentOutOfRangeException(nameof(ecs));
+        if (ecs.Length == 1)
+            return false;
 
         var list = ecs.ToArray().ToList();
 
@@ -94,6 +98,8 @@ public static class GroupSeedValidator
             throw new ArgumentOutOfRangeException(nameof(ecs));
         if ((uint)firstIndexEC >= ecs.Length)
             throw new ArgumentOutOfRangeException(nameof(ecs));
+        if (ecs.Length == 1)
+            return false;
 
         var list = ecs.ToArray().ToList();
 
