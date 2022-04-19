@@ -61,7 +61,7 @@ public static class GroupSeedValidator
         if (ecs.Length == 1)
             return false;
 
-        var list = ecs.ToArray().ToList();
+        var list = new List<uint>(ecs.ToArray());
 
         while (list.Count != 0)
         {
@@ -101,7 +101,7 @@ public static class GroupSeedValidator
         if (ecs.Length == 1)
             return false;
 
-        var list = ecs.ToArray().ToList();
+        var list = new List<uint>(ecs.ToArray());
 
         // Check first
         var rand = new Xoroshiro128Plus(seed);
@@ -128,7 +128,7 @@ public static class GroupSeedValidator
             _ = rand.Next(); // alpha move, don't care
 
             var ec = GetEncryptionConstant(genseed);
-            var index = ecs.IndexOf(ec);
+            var index = list.IndexOf(ec);
             if (index == -1)
                 return false;
 
