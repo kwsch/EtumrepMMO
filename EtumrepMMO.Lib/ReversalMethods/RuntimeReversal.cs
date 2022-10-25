@@ -253,7 +253,7 @@ public static class RuntimeReversal
         var genderratio = PersonalTable.LA[pk.Species].Gender;
         if (genderratio is not (PersonalInfo.RatioMagicGenderless or PersonalInfo.RatioMagicFemale or PersonalInfo.RatioMagicMale))
         {
-            var gender = (int)rng.NextInt(252) + 1 < genderratio ? 1 : 0; // Gender
+            var gender = (int)rng.NextInt(253) + 1 < genderratio ? 1 : 0; // Gender
             if (gender != pk.Gender)
                 return false;
         }
