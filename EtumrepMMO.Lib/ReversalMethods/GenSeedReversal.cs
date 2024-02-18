@@ -57,7 +57,7 @@ public static class GenSeedReversal
         var tmp2 = ctx.MkBV(1 << 16, 64);
         s0 = ctx.MkBVXOR(tmp, ctx.MkBVXOR(s1, ctx.MkBVMul(s1, tmp2)));
         s1 = ctx.MkBVRotateLeft(37, s1);
-        return ctx.MkBVAdd(s0, s1); // genseed
+        return ctx.MkBVAdd(s0, s1); // genSeed
         // no rot/xor needed, the add result is enough.
     }
 

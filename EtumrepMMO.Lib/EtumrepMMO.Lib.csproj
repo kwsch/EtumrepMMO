@@ -1,9 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
@@ -12,14 +9,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PKHeX.Core" Version="22.3.1" />
+    <PackageReference Include="PKHeX.Core" Version="24.1.12" />
   </ItemGroup>
 
   <Choose>
     <When Condition=" '$(Platform)' == 'x64' OR $(RuntimeIdentifier.EndsWith('x64')) ">
       <!-- x64 specific references -->
       <ItemGroup>
-        <PackageReference Include="Microsoft.Z3" Version="4.8.14" />
+        <PackageReference Include="Microsoft.Z3" Version="4.12.2" />
       </ItemGroup>
     </When>
     <Otherwise>

@@ -1,4 +1,4 @@
-﻿using PKHeX.Core;
+using PKHeX.Core;
 
 namespace EtumrepMMO.Lib;
 
@@ -8,7 +8,7 @@ namespace EtumrepMMO.Lib;
 public static class GroupSeedValidator
 {
     /// <summary>
-    /// Uses the input <see cref="seed"/> as the group seed to check if it generates all of the input <see cref="PKM.EncryptionConstant"/> values.
+    /// Uses the input <see cref="seed"/> as the group seed to check if it generates all the input <see cref="PKM.EncryptionConstant"/> values.
     /// </summary>
     /// <param name="seed">Group seed</param>
     /// <param name="ecs">Entity encryption constants</param>
@@ -32,10 +32,10 @@ public static class GroupSeedValidator
         var rand = new Xoroshiro128Plus(seed);
         for (int i = 0; i < count; i++)
         {
-            var genseed = rand.Next(); // generate/slot seed
+            var genSeed = rand.Next(); // generate/slot seed
             _ = rand.Next(); // alpha move, don't care
 
-            var ec = GetEncryptionConstant(genseed);
+            var ec = GetEncryptionConstant(genSeed);
             var index = ecs.IndexOf(ec);
             if (index != -1)
                 matched++;
@@ -45,7 +45,7 @@ public static class GroupSeedValidator
     }
 
     /// <summary>
-    /// Uses the input <see cref="seed"/> as the group seed to check if it generates all of the input <see cref="PKM.EncryptionConstant"/> values.
+    /// Uses the input <see cref="seed"/> as the group seed to check if it generates all the input <see cref="PKM.EncryptionConstant"/> values.
     /// </summary>
     /// <param name="seed">Group seed</param>
     /// <param name="ecs">Entity encryption constants</param>
@@ -67,10 +67,10 @@ public static class GroupSeedValidator
         {
             var rand = new Xoroshiro128Plus(seed);
 
-            var genseed = rand.Next(); // generate/slot seed
+            var genSeed = rand.Next(); // generate/slot seed
             _ = rand.Next(); // alpha move, don't care
 
-            var ec = GetEncryptionConstant(genseed);
+            var ec = GetEncryptionConstant(genSeed);
             var index = list.IndexOf(ec);
             if (index == -1)
                 return false;
@@ -85,7 +85,7 @@ public static class GroupSeedValidator
     }
 
     /// <summary>
-    /// Uses the input <see cref="seed"/> as the group seed to check if it generates all of the input <see cref="PKM.EncryptionConstant"/> values.
+    /// Uses the input <see cref="seed"/> as the group seed to check if it generates all the input <see cref="PKM.EncryptionConstant"/> values.
     /// </summary>
     /// <param name="seed">Group seed</param>
     /// <param name="ecs">Entity encryption constants</param>
@@ -106,9 +106,9 @@ public static class GroupSeedValidator
         // Check first
         var rand = new Xoroshiro128Plus(seed);
         {
-            var genseed = rand.Next(); // generate/slot seed
+            var genSeed = rand.Next(); // generate/slot seed
             _ = rand.Next(); // alpha move, don't care
-            var ec = GetEncryptionConstant(genseed);
+            var ec = GetEncryptionConstant(genSeed);
             if (ec != ecs[firstIndexEC])
                 return false;
 
@@ -124,10 +124,10 @@ public static class GroupSeedValidator
         int count = list.Count;
         for (int i = 0; i < count; i++)
         {
-            var genseed = rand.Next(); // generate/slot seed
+            var genSeed = rand.Next(); // generate/slot seed
             _ = rand.Next(); // alpha move, don't care
 
-            var ec = GetEncryptionConstant(genseed);
+            var ec = GetEncryptionConstant(genSeed);
             var index = list.IndexOf(ec);
             if (index == -1)
                 return false;
@@ -143,7 +143,7 @@ public static class GroupSeedValidator
         var slotRand = new Xoroshiro128Plus(genSeed);
         _ = slotRand.Next(); // slot
         var entitySeed = slotRand.Next();
-     // _ = slotrng.Next(); // level
+     // _ = slotRand.Next(); // level
 
         var entityRand = new Xoroshiro128Plus(entitySeed);
         return (uint)entityRand.NextInt();

@@ -1,4 +1,4 @@
-﻿using PKHeX.Core;
+using PKHeX.Core;
 using static EtumrepMMO.Lib.SpawnerType;
 
 namespace EtumrepMMO.Lib;
@@ -32,7 +32,9 @@ public static class GroupSeedFinder
     public static IReadOnlyList<PKM> GetInputs(IEnumerable<string> files) => GetInputs(files.Select(File.ReadAllBytes));
 
     /// <inheritdoc cref="GetInputs(string)"/>
-    public static IReadOnlyList<PKM> GetInputs(IEnumerable<byte[]> data) => data.Select(PKMConverter.GetPKMfromBytes).OfType<PKM>().ToArray();
+    public static IReadOnlyList<PKM> GetInputs(IEnumerable<byte[]> data) => data.Select(GetFromBytes).OfType<PKM>().ToArray();
+
+    private static PKM? GetFromBytes(byte[] data) => EntityFormat.GetFromBytes(data);
 
     #endregion
 

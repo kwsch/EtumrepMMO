@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using PKHeX.Core;
 
@@ -57,15 +57,15 @@ public static class IterativeReversal
     public static int FindSeeds(PKM pk, byte max_rolls, Span<ulong> seeds, Span<byte> rolls)
     {
         // IVs are in order of Speed Last.
-        ReadOnlySpan<byte> ivs = stackalloc byte[6]
-        {
+        ReadOnlySpan<byte> ivs =
+        [
             (byte)pk.IV_HP,
             (byte)pk.IV_ATK,
             (byte)pk.IV_DEF,
             (byte)pk.IV_SPA,
             (byte)pk.IV_SPD,
             (byte)pk.IV_SPE,
-        };
+        ];
         return FindSeeds(pk.PID, pk.EncryptionConstant, ivs, max_rolls, seeds, rolls);
     }
 

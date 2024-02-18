@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -75,7 +75,7 @@ public static class RuntimeReversal
     private static List<SeedSearchResult> GetAllSeeds(PKM pk, byte max_rolls)
     {
         var result = new List<SeedSearchResult>();
-        ConcurrentBag<ulong> seeds = new();
+        ConcurrentBag<ulong> seeds = [];
 
         if (pk.IsShiny)
         {
@@ -84,10 +84,11 @@ public static class RuntimeReversal
         else
         {
             FindPotentialSeeds(seeds, pk.PID, pk.EncryptionConstant, max_rolls);
-            if (IsPotentialAntiShiny(pk.TID, pk.SID, pk.PID))
+            if (IsPotentialAntiShiny(pk.TID16, pk.SID16, pk.PID))
                 FindPotentialSeeds(seeds, pk.PID ^ 0x1000_0000, pk.EncryptionConstant, max_rolls);
         }
 
+        Span<int> IVs = [pk.IV_HP, pk.IV_ATK, pk.IV_DEF, pk.IV_SPA, pk.IV_SPD, pk.IV_SPE];
         foreach (var seed in seeds)
         {
             for (var cnt = 1; cnt <= max_rolls; cnt++)
@@ -98,7 +99,7 @@ public static class RuntimeReversal
                     if (ivs is > 0 and < 3)
                         ivs = 3;
 
-                    if (pk.FlawlessIVCount >= ivs && IsMatch(seed, ivs, cnt, pk))
+                    if (pk.FlawlessIVCount >= ivs && IsMatch(IVs, seed, ivs, cnt, pk))
                         result.Add(new SeedSearchResult(seed, cnt));
                 }
             }
@@ -113,12 +114,12 @@ public static class RuntimeReversal
     /// <param name="sid">16-bit trainer ID (secret)</param>
     /// <param name="pid">32-bit entity personality value</param>
     /// <returns>True if was shiny, then made anti-shiny.</returns>
-    public static bool IsPotentialAntiShiny(int tid, int sid, uint pid)
+    public static bool IsPotentialAntiShiny(ushort tid, ushort sid, uint pid)
     {
         return GetIsShiny(tid, sid, pid ^ 0x1000_0000);
     }
 
-    private static bool GetIsShiny(int tid, int sid, uint pid)
+    private static bool GetIsShiny(ushort tid, ushort sid, uint pid)
     {
         return GetShinyXor(pid, (uint)((sid << 16) | tid)) < 16;
     }
@@ -134,10 +135,10 @@ public static class RuntimeReversal
         ulong start_seed = ec - unchecked((uint)Xoroshiro128Plus.XOROSHIRO_CONST);
         Debug.WriteLine($"Iteration start seed: {start_seed:X16}");
 
-        Parallel.For(0, 0xFFFF, i =>
+        Parallel.For(0, 0x10000, i =>
         {
             var test = start_seed | (ulong)i << 48;
-            for (int x = 0; x < 65536; x++)
+            for (int x = 0; x < 0x10000; x++)
             {
                 var seed = CheckSeed(test, pid, max_rolls);
                 if (seed != 0)
@@ -152,10 +153,10 @@ public static class RuntimeReversal
         ulong start_seed = ec - unchecked((uint)Xoroshiro128Plus.XOROSHIRO_CONST);
         Debug.WriteLine($"Iteration start seed: {start_seed:X16}");
 
-        Parallel.For(0, 0xFFFF, i =>
+        Parallel.For(0, 0x10000, i =>
         {
             var test = start_seed | (ulong)i << 48;
-            for (int x = 0; x < 65536; x++)
+            for (int x = 0; x < 0x10000; x++)
             {
                 var seed = CheckSeedShiny(test, pid, max_rolls);
                 if (seed != 0)
@@ -198,11 +199,8 @@ public static class RuntimeReversal
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsMatch(ulong seed, int fixed_ivs, int rolls, PKM pk)
+    private static bool IsMatch(ReadOnlySpan<int> IVs, ulong seed, int fixed_ivs, int rolls, PKM pk)
     {
-        int[] IVs = pk.IVs;
-        PKX.ReorderSpeedLast(IVs);
-
         var rng = new Xoroshiro128Plus(seed);
         rng.NextInt(); // EC
         uint fakeTID = (uint)rng.NextInt(); // TID
