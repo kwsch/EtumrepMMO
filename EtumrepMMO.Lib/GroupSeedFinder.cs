@@ -78,6 +78,6 @@ public static class GroupSeedFinder
                 }
             }
         }
-        return (default, -1);
+        return (0, -1);
     }
 }
