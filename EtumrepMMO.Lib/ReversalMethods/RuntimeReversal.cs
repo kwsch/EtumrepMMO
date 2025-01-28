@@ -250,6 +250,15 @@ public static class RuntimeReversal
             return false;
 
         var genderratio = PersonalTable.LA[pk.Species].Gender;
+        if (VerifyGenderAndScale(pk, rng, genderratio))
+            return true;
+        if (pk.Species is (ushort)Species.Basculin)
+            return VerifyGenderAndScale(pk, rng, pk.Gender == 0 ? PersonalInfo.RatioMagicMale : PersonalInfo.RatioMagicFemale);
+        return false;
+    }
+
+    private static bool VerifyGenderAndScale(PKM pk, Xoroshiro128Plus rng, int genderratio)
+    {
         if (genderratio is not (PersonalInfo.RatioMagicGenderless or PersonalInfo.RatioMagicFemale or PersonalInfo.RatioMagicMale))
         {
             var gender = (int)rng.NextInt(253) + 1 < genderratio ? 1 : 0; // Gender
@@ -261,7 +270,7 @@ public static class RuntimeReversal
         if (nature != pk.Nature)
             return false;
 
-        if (pk is IAlpha { IsAlpha: true})
+        if (pk is IAlpha { IsAlpha: true })
             return true;
 
         if (pk is not IScaledSize s)
@@ -272,10 +281,7 @@ public static class RuntimeReversal
             return false;
 
         var weight = (int)rng.NextInt(0x81) + (int)rng.NextInt(0x80);
-        if (weight != s.WeightScalar)
-            return false;
-
-        return true;
+        return weight == s.WeightScalar;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
