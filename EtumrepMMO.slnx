@@ -1,0 +1,18 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="EtumrepMMO.ConsoleApp/EtumrepMMO.ConsoleApp.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="Debug|x86" Project="x64" />
+  </Project>
+  <Project Path="EtumrepMMO.Lib/EtumrepMMO.Lib.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+  </Project>
+  <Project Path="EtumrepMMO.Tests/EtumrepMMO.Tests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+  </Project>
+</Solution>
